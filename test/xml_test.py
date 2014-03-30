@@ -1,7 +1,8 @@
 from os.path import getsize
 import sys
 import unittest
-from cStringIO import StringIO
+from six import StringIO
+from six.moves import reload_module as reload
 
 import pymarc
 
@@ -108,7 +109,7 @@ class XmlTest(unittest.TestCase):
         self.assertEqual(getsize(outfile), 0)
 
     def test_strict(self):
-        a = pymarc.parse_xml_to_array(file('test/batch.xml'), strict=True)
+        a = pymarc.parse_xml_to_array(open('test/batch.xml'), strict=True)
         self.assertEqual(len(a), 2)
     
     def test_xml_namespaces(self):
@@ -128,7 +129,7 @@ class XmlTest(unittest.TestCase):
         self.assertNotEqual(xml.find('xmlns="http://www.loc.gov/MARC21/slim"'), -1)
 
     def test_bad_tag(self):
-        a = pymarc.parse_xml_to_array(file('test/bad_tag.xml'))
+        a = pymarc.parse_xml_to_array(open('test/bad_tag.xml'))
         self.assertEqual(len(a), 1)
 
 def suite():

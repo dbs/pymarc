@@ -3,6 +3,7 @@
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler, feature_namespaces
 import unicodedata
+from six import text_type, PY3
 
 try:
     import xml.etree.ElementTree as ET  # builtin in Python 2.5
@@ -135,7 +136,7 @@ def record_to_xml(record, quiet=False, namespace=False):
     # TODO: maybe should set g0 and g1 appropriately using 066 $a and $b?
     marc8 = MARC8ToUnicode(quiet=quiet)
     def translate(data):
-        if type(data) == unicode: 
+        if type(data) == text_type: 
             return data
         else: 
             return marc8.translate(data)
@@ -162,4 +163,7 @@ def record_to_xml(record, quiet=False, namespace=False):
                 data_subfield.set('code', subfield[0])
                 data_subfield.text = translate(subfield[1])
 
-    return ET.tostring(root)
+    if PY3:
+        return ET.tostring(root, encoding="unicode")
+    else:
+        return ET.tostring(root)

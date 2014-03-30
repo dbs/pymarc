@@ -2,6 +2,7 @@
 
 from pymarc.constants import SUBFIELD_INDICATOR, END_OF_FIELD
 from pymarc.marc8 import marc8_to_unicode
+from six import PY2
 
 class Field(object):
     """
@@ -114,7 +115,7 @@ class Field(object):
                 break
             num_code -= 1
 
-    def next(self):
+    def __next__(self):
         "Needed for iteration."
         while self.__pos < len(self.subfields):
             subfield = (self.subfields[ self.__pos ],
@@ -122,6 +123,10 @@ class Field(object):
             self.__pos += 2
             return subfield
         raise StopIteration
+
+    def next(self):
+        "Needed for Python 2 iteration."
+        return self.__next__()
 
     def value(self):
         """

@@ -1,10 +1,10 @@
-from cStringIO import StringIO
 import sys
 import os
 import json
 
 from pymarc import Record, Field
 from pymarc.exceptions import RecordLengthInvalid
+from six import iteritems, StringIO
 
 class Reader(object):
     """
@@ -70,9 +70,9 @@ class MARCReader(Reader):
         else: 
             self.file_handle = StringIO(marc_target)
 
-    def next(self):
+    def __next__(self):
         """
-        To support iteration. 
+        To support Python3 iteration. 
         """
         first5 = self.file_handle.read(5)
         if not first5:
@@ -89,6 +89,10 @@ class MARCReader(Reader):
                         hide_utf8_warnings=self.hide_utf8_warnings,
                         utf8_handling=self.utf8_handling)
         return record 
+
+    def next(self):
+        "Support Python2 iteration"
+        return self.__next__()
 
 def map_records(f, *files):
     """
@@ -124,12 +128,13 @@ class JSONReader(Reader):
         	self.iter = iter([self.records])
         return self
 
-    def next(self):
+    def __next__(self):
+        "Python 3 iterator method"
         jobj = next(self.iter)
         rec = Record()
         rec.leader = jobj['leader']
         for field in jobj['fields']:
-            k,v = list(field.iteritems())[0]
+            k,v = list(iteritems(field))[0]
             if 'subfields' in v and hasattr(v,'update'):
                 # flatten m-i-j dict to list in pymarc
                 subfields = []
@@ -142,3 +147,6 @@ class JSONReader(Reader):
             rec.add_field(fld)
         return rec
 
+    def next(self):
+        "Python 2 iterator method"
+        return self.__next__()
