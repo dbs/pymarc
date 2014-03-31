@@ -1,5 +1,18 @@
-import pymarc
-version = pymarc.__version__
+def get_version():
+    """
+    Parse the version from __init__
+
+    Avoids dependency hell due to __init__ requiring the "six" module,
+    while maintaining the convenience of specifying version just once.
+    """
+
+    import re
+    with open('pymarc/__init__.py', 'r') as f:
+        content = f.readlines()
+    for line in content:
+        if line.startswith('__version__'):
+            version = re.sub(r'^__version__\s*=\s*([\'"])(.+?)\1', r'\2', line)
+    return version
 
 from setuptools import setup, find_packages
 
@@ -23,11 +36,9 @@ Programming Language :: Python
 Topic :: Text Processing :: General
 """
 
-import pymarc
-
 setup( 
     name = 'pymarc',
-    version = version,
+    version = get_version(),
     url = 'http://github.com/edsu/pymarc',
     author = 'Ed Summers',
     author_email = 'ehs@pobox.com',
